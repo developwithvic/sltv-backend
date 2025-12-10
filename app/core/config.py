@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "changethis"
     ALGORITHM: str = "RS256"
 
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
+    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000", "https://sltv-frontend.vercel.app"]
     ALLOWED_HOSTS: List[str] = ["*"]
 
     @property

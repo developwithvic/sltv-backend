@@ -14,3 +14,4 @@ mailjet-rest
 jinja2
 asyncpg
 aiosqlite
+slowapi

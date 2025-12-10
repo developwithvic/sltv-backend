@@ -365,3 +365,5 @@ class EmailService:
             },
             template_name=template
         )
+
+email_service = EmailService()

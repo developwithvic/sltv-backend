@@ -1,6 +1,6 @@
 from datetime import timedelta
 from typing import Any
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core import security
 from app.core.config import settings
@@ -71,6 +71,7 @@ async def verify_email(
 @router.post("/forgot-password")
 async def forgot_password(
     email: str,
+    background_tasks: BackgroundTasks,
     user_repo: UserRepository = Depends(deps.get_user_repository)
 ) -> Any:
     """
@@ -83,7 +84,8 @@ async def forgot_password(
 
     token = security.create_email_token(email, "reset")
     from app.services.email_service import email_service
-    await email_service.send_password_reset_email(email, token)
+    reset_link = f"https://sltv-frontend.vercel.app/reset-password?token={token}"
+    email_service.send_password_reset_email(background_tasks, email, user.full_name or "User", reset_link)
 
     return {"message": "If the email exists, a reset link has been sent."}
 

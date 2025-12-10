@@ -1,11 +1,14 @@
 from typing import List
 from pydantic_settings import BaseSettings
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "VTU Backend"
     API_V1_STR: str = "/api/v1"
-    DATABASE_URL: str = "sqlite:///./vtu.db"
-    SECRET_KEY: str = "changethis"
+    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = "RS256"
 
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000", "https://sltv-frontend.vercel.app"]

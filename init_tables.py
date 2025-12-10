@@ -25,6 +25,7 @@ if not os.getenv("PAYSTACK_SECRET_KEY"):
 from app.core.database import init_db
 from app.models.user import User # Ensure User model is registered
 from app.models.support import Ticket, TicketMessage # Ensure models are registered
+from app.models.admin import Admin # Ensure Admin model is registered
 
 async def main():
     print("Initializing database tables...")

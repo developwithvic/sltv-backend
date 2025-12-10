@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: sltv-backend
+    runtime: docker
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: JWT_PRIVATE_KEY
+        sync: false
+      - key: JWT_PUBLIC_KEY
+        sync: false
+      - key: MAIL_JET_API
+        sync: false
+      - key: MAIL_JET_SECRET
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: MOBILENIG_PUBLIC_KEY
+        sync: false
+      - key: MOBILENIG_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: SLTV_USERNAME
+        sync: false
+      - key: SLTV_PASSWORD
+        sync: false

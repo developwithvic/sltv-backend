@@ -616,35 +616,12 @@ async def refresh_tv(
 async def purchase_tv(
     request: TVRequest,
     background_tasks: BackgroundTasks,
-    current_user: User = Depends(deps.get_current_active_user),
     wallet_repo: WalletRepository = Depends(deps.get_wallet_repository),
 ):
     """
     Purchase TV subscription (e.g. SLTV).
     """
-    wallet = await wallet_repo.get_by_user_id(current_user.id)
-    if not wallet:
-        raise HTTPException(status_code=404, detail="Wallet not found")
 
-    if wallet.balance < request.amount:
-        raise HTTPException(status_code=400, detail="Insufficient funds")
-
-    wallet.balance -= request.amount
-    await wallet_repo.update(wallet, {"balance": wallet.balance})
-
-    trans_id = generate_trans_id("TV")
-    transaction = Transaction(
-        wallet_id=wallet.id,
-        user_id=current_user.id,
-        trans_id=trans_id,
-        amount=request.amount,
-        type="debit",
-        status="processing",
-        reference=f"TV-{wallet.id}-{request.smart_card_number}",
-        service_type="tv",
-        meta_data=f"Provider: {request.provider}"
-    )
-    await wallet_repo.create_transaction(transaction)
 
     # Execute purchase synchronously
     vtu_service = VTUAutomator()
@@ -654,114 +631,14 @@ async def purchase_tv(
         result_message = await run_in_threadpool(vtu_service.purchase_tv, request)
 
         if result_message:
-            # Success
-            transaction.status = "success"
-            transaction.meta_data += f" | Result: {result_message}"
-            await wallet_repo.update_transaction(transaction)
 
-            # Send Success Email
-            EmailService.send_purchase_success_email(
-                background_tasks,
-                current_user.email,
-                current_user.full_name,
-                f"TV {request.provider} {request.amount}",
-                request.amount,
-                transaction.reference,
-                request.smart_card_number
-            )
-
-            return {"status": "success", "message": result_message, "transaction_id": transaction.id}
+            return {"status": "success", "message": result_message}
         else:
-            # Failed
-            transaction.status = "failed"
-            transaction.meta_data += " | Result: Failed to capture success message or error occurred."
-            await wallet_repo.update_transaction(transaction)
-
-            # Send Failed Email
-            EmailService.send_purchase_failed_email(
-                background_tasks,
-                current_user.email,
-                current_user.full_name,
-                f"TV {request.provider} {request.amount}",
-                request.amount,
-                transaction.reference,
-                "Failed to capture success message"
-            )
-
-            # Refund the user
-            wallet.balance += request.amount
-            await wallet_repo.update(wallet, {"balance": wallet.balance})
-
-            # Create refund transaction
-            refund_trans_id = generate_trans_id("REFUND")
-            refund_transaction = Transaction(
-                wallet_id=wallet.id,
-                user_id=current_user.id,
-                trans_id=refund_trans_id,
-                amount=request.amount,
-                type="credit",
-                status="success",
-                reference=f"REFUND-{transaction.id}",
-                service_type="refund",
-                meta_data=f"Refund for failed TV transaction {transaction.id}"
-            )
-            await wallet_repo.create_transaction(refund_transaction)
-
-            # Send Refund Email
-            EmailService.send_refund_email(
-                background_tasks,
-                current_user.email,
-                current_user.full_name,
-                f"TV {request.provider} {request.amount}",
-                request.amount,
-                refund_transaction.reference
-            )
+            pass
 
             raise HTTPException(status_code=400, detail="Transaction failed. Your wallet has been refunded.")
 
     except Exception as e:
-        # Exception occurred
-        transaction.status = "failed"
-        transaction.meta_data += f" | Error: {str(e)}"
-        await wallet_repo.update_transaction(transaction)
-
-        # Send Failed Email
-        EmailService.send_purchase_failed_email(
-            background_tasks,
-            current_user.email,
-            current_user.full_name,
-            f"TV {request.provider} {request.amount}",
-            request.amount,
-            transaction.reference,
-            str(e)
-        )
-
-        # Refund the user
-        wallet.balance += request.amount
-        await wallet_repo.update(wallet, {"balance": wallet.balance})
-
-        refund_trans_id = generate_trans_id("REFUND")
-        refund_transaction = Transaction(
-            wallet_id=wallet.id,
-            user_id=current_user.id,
-            trans_id=refund_trans_id,
-            amount=request.amount,
-            type="credit",
-            status="success",
-            reference=f"REFUND-{transaction.id}",
-            service_type="refund",
-            meta_data=f"Refund for failed TV transaction {transaction.id}"
-        )
-        await wallet_repo.create_transaction(refund_transaction)
-
-        # Send Refund Email
-        EmailService.send_refund_email(
-            background_tasks,
-            current_user.email,
-            current_user.full_name,
-            f"TV {request.provider} {request.amount}",
-            request.amount,
-            refund_transaction.reference
-        )
+        pass
 
         raise HTTPException(status_code=500, detail=f"Transaction failed with error: {str(e)}. Your wallet has been refunded.")

@@ -277,7 +277,7 @@ class VTUAutomator:
                         try:
                             self.wait.until(EC.alert_is_present())
                             # CHANGED TO ACCEPT: 'dismiss' usually cancels the transaction. 'accept' hits OK.
-                            self.driver.switch_to.alert.dismiss()
+                            self.driver.switch_to.alert.accept()
                             logger.info("Popup Accepted.")
                         except TimeoutException:
                             logger.warning("No popup appeared.")

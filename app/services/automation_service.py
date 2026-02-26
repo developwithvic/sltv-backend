@@ -261,9 +261,9 @@ class VTUAutomator:
 
                     logger.info("Selecting Plan...")
                     if request.value == 1:
-                        plan_xpath = "//*[@id='rechagestblist']/table/tbody/tr[1]/td[2]/input"
-                    else:
                         plan_xpath = "//*[@id='rechagestblist']/table/tbody/tr[2]/td[2]/input"
+                    else:
+                        plan_xpath = "//*[@id='rechagestblist']/table/tbody/tr[1]/td[2]/input"
                         
                     recharge_btn_xpath = "//*[@id='recharge']"
                     success_msg_xpath = "//*[@id='error']/div"

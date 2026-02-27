@@ -260,7 +260,8 @@ class VTUAutomator:
                         raise Exception("Search iframe not found.")
 
                     logger.info("Selecting Plan...")
-                    if int(request.value) == 1:
+                    plan_value = int(request.value)
+                    if plan_value == 1:
                         plan_xpath = "//*[@id='rechagestblist']/table/tbody/tr[2]/td[2]/input"
                     else:
                         plan_xpath = "//*[@id='rechagestblist']/table/tbody/tr[1]/td[2]/input"

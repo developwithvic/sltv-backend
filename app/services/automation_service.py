@@ -262,8 +262,10 @@ class VTUAutomator:
                     logger.info("Selecting Plan...")
                     plan_value = int(request.value)
                     if plan_value == 1:
+                        print("This value passed successfully")
                         plan_xpath = "//*[@id='rechagestblist']/table/tbody/tr[2]/td[2]/input"
                     else:
+                        print("The value has not been passed sucessfully")
                         plan_xpath = "//*[@id='rechagestblist']/table/tbody/tr[1]/td[2]/input"
                         
                     recharge_btn_xpath = "//*[@id='recharge']"
@@ -282,7 +284,7 @@ class VTUAutomator:
                         try:
                             self.wait.until(EC.alert_is_present())
                             # CHANGED TO ACCEPT: 'dismiss' usually cancels the transaction. 'accept' hits OK.
-                            self.driver.switch_to.alert.accept()
+                            self.driver.switch_to.alert.dismiss()
                             logger.info("Popup Accepted.")
                         except TimeoutException:
                             logger.warning("No popup appeared.")

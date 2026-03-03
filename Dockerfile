@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# Step 1: Install system dependencies & Chrome's required shared libraries
+# Step 1: Install system dependencies & Chrome shared libraries
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -29,18 +29,13 @@ RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd6
 
 WORKDIR /app
 
-# Step 3: Copy only requirements/scripts first (Better Docker caching)
-COPY requirements.txt . 
+# Step 3: Optimization - Copy dependencies first for faster builds
 COPY install_dependencies.py .
-
-# Step 4: Install Python dependencies
-# Note: Using a requirements.txt is standard, but keeping your script since you prefer it
 RUN python install_dependencies.py
 
-# Step 5: Copy the rest of the application
+# Step 4: Copy application code
 COPY . .
 
-EXPOSE 8000
-
-# Start command (Added --proxy-headers for Render/Uvicorn stability)
+# Step 5: Start command
+# Added --proxy-headers for FastAPI/Render stability
 CMD sh -c "python init_tables.py && python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers"
